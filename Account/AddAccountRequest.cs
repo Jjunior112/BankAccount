@@ -1,1 +1,1 @@
-public record AddAccountRequest(string name, string password);
+public record AddAccountRequest(string name, string password, string confirmPassword);

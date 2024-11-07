@@ -11,14 +11,15 @@ public static class AccountRoutes
 
         AccountRoutes.MapPost(pattern: "", handler: async (AppDbContext context, AddAccountRequest request) =>
         {
-            if (request.name == null || request.password == null)
+            if (request.name == null || request.password == null || request.confirmPassword == null)
 
                 return Results.Conflict(error: "Todos os campos devem ser preenchidos");
 
-            // int RandomAccountNumber = new Random().Next(10000, 99999);
+            if (request.password.ToLower() != request.confirmPassword.ToLower())
+            return Results.Conflict(error: "As senhas devem ser iguais");
 
             bool AccountExists = await context.Accounts.AnyAsync(account => account.Name.ToLower() == request.name.ToLower());
-
+            
 
 
             if (!AccountExists)
@@ -49,6 +50,8 @@ public static class AccountRoutes
 
                return account;
            });
+
+        
 
     }
 }
