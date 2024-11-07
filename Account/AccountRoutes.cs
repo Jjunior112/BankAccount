@@ -15,13 +15,18 @@ public static class AccountRoutes
 
                 return Results.Conflict(error: "Todos os campos devem ser preenchidos");
 
+            // int RandomAccountNumber = new Random().Next(10000, 99999);
+
             bool AccountExists = await context.Accounts.AnyAsync(account => account.Name.ToLower() == request.name.ToLower());
 
-            var newAccount = new Account(request.name, request.password);
+
 
             if (!AccountExists)
 
             {
+
+                var newAccount = new Account(request.name, request.password);
+
                 await context.AddRangeAsync(newAccount);
 
                 await context.SaveChangesAsync();
@@ -34,11 +39,7 @@ public static class AccountRoutes
                 return Results.Conflict(error: "Conta já existe");
             }
 
-
-
-
         });
-
 
         // Get
 
