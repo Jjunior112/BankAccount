@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.DataProtection.KeyManagement.Internal;
 using Microsoft.EntityFrameworkCore;
 
 public static class AccountRoutes
@@ -7,7 +8,7 @@ public static class AccountRoutes
     {
         var AccountRoutes = app.MapGroup(prefix: "account");
 
-        // Post
+        // Post - criar conta
 
         AccountRoutes.MapPost(pattern: "", handler: async (AppDbContext context, AddAccountRequest request) =>
         {
@@ -16,10 +17,10 @@ public static class AccountRoutes
                 return Results.Conflict(error: "Todos os campos devem ser preenchidos");
 
             if (request.password.ToLower() != request.confirmPassword.ToLower())
-            return Results.Conflict(error: "As senhas devem ser iguais");
+                return Results.Conflict(error: "As senhas devem ser iguais");
 
             bool AccountExists = await context.Accounts.AnyAsync(account => account.Name.ToLower() == request.name.ToLower());
-            
+
 
 
             if (!AccountExists)
@@ -32,7 +33,7 @@ public static class AccountRoutes
 
                 await context.SaveChangesAsync();
 
-                return Results.Ok(newAccount);
+                return Results.Ok(new AccountDto(newAccount.Name, newAccount.AccountNumber, newAccount.Balance));
 
             }
             else
@@ -42,7 +43,7 @@ public static class AccountRoutes
 
         });
 
-        // Get
+        // Get - todas as contas
 
         AccountRoutes.MapGet(pattern: "", handler: async (AppDbContext context, CancellationToken ct) =>
            {
@@ -51,7 +52,48 @@ public static class AccountRoutes
                return account;
            });
 
-        
+        // Put - Depositar dinheiro
+
+        AccountRoutes.MapPut(pattern: "/deposit", handler: async (AppDbContext context, DepositAccountRequest request, CancellationToken ct) =>
+        {
+            var account = await context.Accounts.FirstOrDefaultAsync(account => account.AccountNumber == request.account);
+            if (account == null)
+                return Results.Conflict(error: "A conta para depósito deve ser informada!");
+
+            account.updateBalance(request.value);
+            await context.SaveChangesAsync();
+
+            return Results.Ok(new AccountDto(account.Name, account.AccountNumber, account.Balance));
+
+        });
+
+        // Put - sacar dinheiro
+        // Incluir autenticação JWT
+
+        AccountRoutes.MapPut(pattern: "/withdrawal", handler: async (AppDbContext context, withdrawalAccountRequest request, CancellationToken ct) =>
+        {
+            var account = await context.Accounts.SingleOrDefaultAsync(account => account.AccountNumber == request.account);
+
+            if (account == null)
+
+                return Results.Conflict(error: "Conta deve ser informada!");
+
+            if (account.Balance >= request.value)
+            {
+                account.DowngradeBalance(request.value);
+                await context.SaveChangesAsync(ct);
+            }
+            else
+            {
+                return Results.Conflict(error: "Saldo insuficiente!");
+            }
+
+            return Results.Ok(new AccountDto(account.Name, account.AccountNumber, account.Balance));
+
+
+        });
+
+
 
     }
 }

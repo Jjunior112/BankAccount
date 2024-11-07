@@ -6,7 +6,7 @@ public class Account
 
     public string Name { get; private set; }
 
-    public int AccountNumber { get; private set; }
+    public string AccountNumber { get; private set; }
     public string Password { get; private set; }
 
     public double Balance { get; private set; }
@@ -18,7 +18,9 @@ public class Account
 
         Name = name;
 
-        AccountNumber = new Random().Next(10000, 99999);
+        var randomAccountNumber = new Random().Next(10000, 99999);
+
+        AccountNumber = randomAccountNumber.ToString();
 
         Balance = 0;
 
@@ -26,5 +28,14 @@ public class Account
 
         Active = true;
 
+    }
+    public void updateBalance(double value)
+    {
+        Balance += value;
+
+    }
+
+    public void DowngradeBalance(double value){
+        Balance -= value;
     }
 }
