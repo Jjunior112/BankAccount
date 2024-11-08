@@ -1,1 +1,1 @@
-public record withdrawalAccountRequest(string account,double value);
+public record withdrawalAccountRequest(double value);

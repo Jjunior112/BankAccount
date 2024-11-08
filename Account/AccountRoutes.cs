@@ -43,15 +43,18 @@ public static class AccountRoutes
 
         // Get - Consultar saldo
 
-        AccountRoutes.MapGet(pattern: "/balance/{accountNumber}", handler: async(string accountNumber, AppDbContext context)=>{
-          
-            var account = await context.Accounts.FirstOrDefaultAsync(acount => acount.AccountNumber == accountNumber );
-          if(account!=null){
-          return Results.Ok(new AccountDto(account.Name,account.AccountNumber, account.Balance));
-          }
-          else{
-            return Results.Conflict(error:"Conta inválida");
-          }
+        AccountRoutes.MapGet(pattern: "/balance/{accountNumber}", handler: async (string accountNumber, AppDbContext context) =>
+        {
+
+            var account = await context.Accounts.FirstOrDefaultAsync(acount => acount.AccountNumber == accountNumber);
+            if (account != null)
+            {
+                return Results.Ok(new AccountDto(account.Name, account.AccountNumber, account.Balance));
+            }
+            else
+            {
+                return Results.Conflict(error: "Conta inválida");
+            }
         });
 
 
@@ -83,9 +86,9 @@ public static class AccountRoutes
         // Put - sacar dinheiro
         // Incluir autenticação JWT
 
-        AccountRoutes.MapPut(pattern: "/withdrawal", handler: async (AppDbContext context, withdrawalAccountRequest request, CancellationToken ct) =>
+        AccountRoutes.MapPut(pattern: "/withdrawal/{accountNumber}", handler: async (string accountNumber, AppDbContext context, withdrawalAccountRequest request, CancellationToken ct) =>
         {
-            var account = await context.Accounts.SingleOrDefaultAsync(account => account.AccountNumber == request.account);
+            var account = await context.Accounts.SingleOrDefaultAsync(account => account.AccountNumber == accountNumber);
 
             if (account == null)
 
@@ -103,6 +106,40 @@ public static class AccountRoutes
 
             return Results.Ok(new AccountDto(account.Name, account.AccountNumber, account.Balance));
 
+
+
+
+
+        });
+
+        // Delete - fechar conta
+
+        AccountRoutes.MapDelete(pattern: "/closeAccount/{accountNumber}", handler: async (string accountNumber, AppDbContext context, CancellationToken ct) =>
+        {
+            var account = await context.Accounts.FirstOrDefaultAsync(account => account.AccountNumber == accountNumber, ct);
+
+            if (account != null)
+            {
+
+                if (account.Balance == 0)
+                {
+                    context.Accounts.Remove(account);
+
+                    await context.SaveChangesAsync(ct);
+
+                }
+                else if (account.Balance < 0)
+                {
+                    return Results.Conflict(error: "O saldo não pode estar negativo. Realize regularização das pendências antes de fechar a conta!");
+                }
+                else
+                {
+                    return Results.Conflict(error: "Não foi possível fechar a conta devido ao saldo estar positivo. Faça um saque antes do fechamento!");
+                }
+
+            }
+
+            return Results.Ok("Conta encerrada com sucesso!");
 
         });
 
