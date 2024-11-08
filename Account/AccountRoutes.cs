@@ -21,8 +21,6 @@ public static class AccountRoutes
 
             bool AccountExists = await context.Accounts.AnyAsync(account => account.Name.ToLower() == request.name.ToLower());
 
-
-
             if (!AccountExists)
 
             {
@@ -43,7 +41,22 @@ public static class AccountRoutes
 
         });
 
+        // Get - Consultar saldo
+
+        AccountRoutes.MapGet(pattern: "/balance/{accountNumber}", handler: async(string accountNumber, AppDbContext context)=>{
+          
+            var account = await context.Accounts.FirstOrDefaultAsync(acount => acount.AccountNumber == accountNumber );
+          if(account!=null){
+          return Results.Ok(new AccountDto(account.Name,account.AccountNumber, account.Balance));
+          }
+          else{
+            return Results.Conflict(error:"Conta inválida");
+          }
+        });
+
+
         // Get - todas as contas
+        // Nivel administrador
 
         AccountRoutes.MapGet(pattern: "", handler: async (AppDbContext context, CancellationToken ct) =>
            {
@@ -92,6 +105,8 @@ public static class AccountRoutes
 
 
         });
+
+
 
 
 
