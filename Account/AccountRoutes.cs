@@ -16,16 +16,18 @@ public static class AccountRoutes
 
                 return Results.Conflict(error: "Todos os campos devem ser preenchidos");
 
-            if (request.password.ToLower() != request.confirmPassword.ToLower())
+            if (request.password.ToLower().Trim() != request.confirmPassword.ToLower().Trim())
                 return Results.Conflict(error: "As senhas devem ser iguais");
 
             bool AccountExists = await context.Accounts.AnyAsync(account => account.Name.ToLower() == request.name.ToLower());
 
+
             if (!AccountExists)
 
             {
+                var hashPassword = BCrypt.Net.BCrypt.HashPassword(request.password);
 
-                var newAccount = new Account(request.name, request.password);
+                var newAccount = new Account(request.name, hashPassword);
 
                 await context.AddRangeAsync(newAccount);
 

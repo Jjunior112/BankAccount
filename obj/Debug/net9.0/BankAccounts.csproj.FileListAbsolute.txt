@@ -127,3 +127,4 @@ C:\Users\juare\Desktop\Programação\C#\BankAccounts\obj\Debug\net9.0\BankAccoun
 C:\Users\juare\Desktop\Programação\C#\BankAccounts\obj\Debug\net9.0\BankAccounts.genruntimeconfig.cache
 C:\Users\juare\Desktop\Programação\C#\BankAccounts\obj\Debug\net9.0\ref\BankAccounts.dll
 C:\Users\juare\Desktop\Programação\C#\BankAccounts\obj\Debug\net9.0\BankAccounts.sourcelink.json
+C:\Users\juare\Desktop\Programação\C#\BankAccounts\bin\Debug\net9.0\BCrypt.Net-Core.dll
