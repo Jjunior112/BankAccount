@@ -18,7 +18,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 
-app.AddAccountRoutes();
+app.AddPublicRoutes();
+
+app.AddPrivateRoutes();
 
 
 app.Run();

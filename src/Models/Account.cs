@@ -1,12 +1,15 @@
+using System.ComponentModel.DataAnnotations;
 using System.Xml;
 
 public class Account
 {
     public Guid id { get; init; }
 
+    [Required]
     public string Name { get; private set; }
 
     public string AccountNumber { get; private set; }
+    [Required]
     public string Password { get; private set; }
 
     public double Balance { get; private set; }
@@ -35,7 +38,8 @@ public class Account
 
     }
 
-    public void DowngradeBalance(double value){
+    public void DowngradeBalance(double value)
+    {
         Balance -= value;
     }
 }
