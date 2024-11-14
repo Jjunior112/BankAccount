@@ -21,7 +21,6 @@ public static class AccountRoutes
 
             bool AccountExists = await context.Accounts.AnyAsync(account => account.Name.ToLower() == request.name.ToLower());
 
-
             if (!AccountExists)
 
             {
@@ -43,7 +42,28 @@ public static class AccountRoutes
 
         });
 
+        // Post - Login 
+
+        AccountRoutes.MapPost(pattern: "/login", handler: async (AppDbContext context, AccountLoginRequest request) =>
+        {
+            var user = await context.Accounts.FirstOrDefaultAsync(account => account.AccountNumber == request.accountNumber);
+
+            if (user != null)
+            {
+                bool isValidPassword = BCrypt.Net.BCrypt.Verify(request.password, user.Password);
+                if (!isValidPassword)
+                    return Results.Unauthorized();
+
+            }
+
+            return Results.Ok();
+
+
+
+        });
+
         // Get - Consultar saldo
+        // Incluir autenticação JWT com privilegios de User
 
         AccountRoutes.MapGet(pattern: "/balance/{accountNumber}", handler: async (string accountNumber, AppDbContext context) =>
         {
@@ -59,9 +79,9 @@ public static class AccountRoutes
             }
         });
 
-
         // Get - todas as contas
         // Nivel administrador
+        // Incluir autenticação JWT com privilegios de Admin
 
         AccountRoutes.MapGet(pattern: "", handler: async (AppDbContext context, CancellationToken ct) =>
            {
@@ -86,7 +106,7 @@ public static class AccountRoutes
         });
 
         // Put - sacar dinheiro
-        // Incluir autenticação JWT
+        // Incluir autenticação JWT com privilegios de User
 
         AccountRoutes.MapPut(pattern: "/withdrawal/{accountNumber}", handler: async (string accountNumber, AppDbContext context, withdrawalAccountRequest request, CancellationToken ct) =>
         {
@@ -107,14 +127,10 @@ public static class AccountRoutes
             }
 
             return Results.Ok(new AccountDto(account.Name, account.AccountNumber, account.Balance));
-
-
-
-
-
         });
 
         // Delete - fechar conta
+        // Incluir autenticação JWT
 
         AccountRoutes.MapDelete(pattern: "/closeAccount/{accountNumber}", handler: async (string accountNumber, AppDbContext context, CancellationToken ct) =>
         {
@@ -144,10 +160,6 @@ public static class AccountRoutes
             return Results.Ok("Conta encerrada com sucesso!");
 
         });
-
-
-
-
 
     }
 }
