@@ -44,22 +44,20 @@ public static class AccountRoutes
 
         // Post - Login 
 
-        AccountRoutes.MapPost(pattern: "/login", handler: async (AppDbContext context, AccountLoginRequest request) =>
+        AccountRoutes.MapPost(pattern: "/login", handler: async (AppDbContext context, AccountLoginRequest request, TokenService service) =>
         {
             var user = await context.Accounts.FirstOrDefaultAsync(account => account.AccountNumber == request.accountNumber);
 
-            if (user != null)
-            {
-                bool isValidPassword = BCrypt.Net.BCrypt.Verify(request.password, user.Password);
-                if (!isValidPassword)
-                    return Results.Unauthorized();
+            if (user == null)
+                return Results.Conflict(error: "Todos os campos devem ser preenchidos");
 
-            }
+            bool isValidPassword = BCrypt.Net.BCrypt.Verify(request.password, user.Password);
+            if (!isValidPassword)
+                return Results.Unauthorized();
 
-            return Results.Ok();
+            var token = service.Generate(user);
 
-
-
+            return Results.Ok(token);
         });
 
         // Get - Consultar saldo
